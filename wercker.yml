@@ -48,16 +48,6 @@ deploy:
       tag: latest, username: $DOCKER_USERNAME
     }
 
-  - cng/cf-deploy: {
-      api: $API,
-      appname: go-helloworld,
-      docker_image: iampeterbanjo/go-helloworld,
-      org: $ORG,
-      password: $PASSWORD,
-      space: $SPACE,
-      user: $USER
-    }
-
 dev:
   steps:
   - setup-go-workspace: {
