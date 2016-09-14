@@ -1,0 +1,6 @@
+#/usr/bin/bash
+rm -rf _builds _steps _projects
+
+wercker build --git-domain github.com --git-owner iampeterbanjo --git-repository go-helloworld
+
+rm -rf _builds _steps _projects

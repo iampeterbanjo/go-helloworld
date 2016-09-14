@@ -1,0 +1,87 @@
+box: golang
+
+build:
+  steps:
+  - setup-go-workspace: {package-dir: go-helloworld}
+  - script: {code: env, name: env}
+  - script: {code: '
+
+        cd $WERCKER_SOURCE_DIR
+
+
+        go version
+
+
+        go get -u github.com/Masterminds/glide
+
+
+        export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
+
+
+        glide install
+
+        ', name: go get}
+  - script: {code: '
+
+        go build
+
+        ', name: go build}
+  - script: {code: '
+
+        go test -v $(glide novendor)
+
+        ', name: go test}
+  - script: {code: '
+
+        cp -R ./ ${WERCKER_OUTPUT_DIR}
+
+        ', name: copy files to wercker output}
+
+deploy:
+  steps:
+  - internal/docker-push: {
+      cmd: /pipeline/source/go-helloworld,
+      password: $DOCKER_PASSWORD,
+      port: '8080',
+      registry: 'https://registry.hub.docker.com',
+      repository: iampeterbanjo/go-helloworld,
+      tag: latest, username: $DOCKER_USERNAME
+    }
+
+  - cng/cf-deploy: {
+      api: $API,
+      appname: go-helloworld,
+      docker_image: iampeterbanjo/go-helloworld,
+      org: $ORG,
+      password: $PASSWORD,
+      space: $SPACE,
+      user: $USER
+    }
+
+dev:
+  steps:
+  - setup-go-workspace: {
+      package-dir: github.com/iampeterbanjo/go-helloworld
+    }
+  - script: {code: env, name: env}
+  - script: {code: '
+
+        cd $WERCKER_SOURCE_DIR
+
+
+        go version
+
+
+        go get -u github.com/Masterminds/glide
+
+
+        export PATH=$WERCKER_SOURCE_DIR/bin:$PATH
+
+
+        glide install
+
+        ', name: go get}
+  - internal/watch: {
+      code: go run main.go,
+      reload: true
+    }
